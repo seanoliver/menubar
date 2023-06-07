@@ -38,6 +38,40 @@ class Bard {
         btn.click();
       }`;
 	}
+
+  /** Adjustments to provider CSS on DOM ready */
+  getDomReadyCss() {
+    return `
+      .chat-history, .conversation-container, .input-area, .mdc-text-area {
+        margin: 0 !important;
+      }
+      response-container {
+        display: none;
+      }
+      model-response response-container {
+        display: block !important;
+      }
+      .gmat-caption {
+        opacity: 0;
+        height: 0;
+      }
+      header {
+        display: none !important;
+      }
+      header + div {
+        display: none !important;
+      }
+      .capabilities-disclaimer {
+        display: none !important;
+      }
+      .input-area-container .input-area {
+        padding: 0;
+      }
+      .logo-gutter {
+        display: none !important;
+      }
+    `;
+  }
 }
 
 /**
@@ -68,6 +102,35 @@ class Oai {
         btn.click();
       }`;
 	}
+
+  /** Adjustments to provider CSS on DOM ready */
+  getDomReadyCss() {
+    return `
+      .text-xs.text-center {
+        opacity: 0;
+        height: 0;
+        margin-bottom: -10px;
+      }
+      .sticky,
+      .pointer-events-auto.flex.border-orange-500,
+      [class*="shared__Capabilities"] {
+        display: none !important;
+      }
+      [class*="shared__Wrapper"] {
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        margin-top: 15vh;
+      }
+      [class*="shared__Wrapper"] h3 {
+        margin-top: -40px;
+        font-size: 20px;
+      }
+      .flex-shrink-0.flex.flex-col.relative.items-end {
+        display: none !important;
+      }
+    `;
+  }
 }
 
 /**
@@ -92,4 +155,20 @@ class Claude {
         btn.click();
       }`;
 	}
+
+  /** Adjustments to provider CSS on DOM ready */
+  getDomReadyCss() {
+    return `
+      header, .container {
+        background-color: white;
+        filter: invert(100%) hue-rotate(180deg);
+      }
+      .p-1.w-9.h-9.shrink-0 {
+        display: none;
+      }
+      .mx-4.md\:mx-12.mb-2.md\:mb-4.mt-2.w-auto {
+        margin: 0 !important;
+      }
+    `;
+  }
 }
