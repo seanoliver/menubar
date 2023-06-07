@@ -31,6 +31,13 @@
   <script>
     const Store = require('electron-store');
     const store = new Store();
+
+    /** Current providers */
+    const { Bard, Oai, Claude } = require('./providers.js');
+    const bard = new Bard();
+    const oai = new Oai();
+    const claude = new Claude();
+
     const webviewOAI = document.getElementById('webviewOAI');
     const webviewBARD = document.getElementById('webviewBARD');
     const webviewCLAUDE = document.getElementById('webviewCLAUDE');
@@ -113,9 +120,9 @@
       const sanitizedInput = promptEl.value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
 
       try {
-        simulateUserInput(webviewBARD, getBardHandler(sanitizedInput));
-        simulateUserInput(webviewOAI, getOaiHandler(sanitizedInput));
-        simulateUserInput(webviewCLAUDE, getClaudeHandler(sanitizedInput));
+        simulateUserInput(webviewBARD, bard.getInputHandler(sanitizedInput));
+        simulateUserInput(webviewOAI, oai.getInputHandler(sanitizedInput));
+        simulateUserInput(webviewCLAUDE, claude.getInputHandler(sanitizedInput));
       } catch (err) {
         console.error('Error simulating user input:', err);
       }
@@ -128,36 +135,19 @@
         form.dispatchEvent(new Event("submit"));
       }
     });
+
     const form = document.getElementById('form');
+
+    /** Submit superprompt to each provider's webview */
     form.addEventListener('submit', function (event) {
       const sanitizedInput = promptEl.value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
       promptEl.value = "";
       event.preventDefault();
-      webviewBARD.executeJavaScript(`
-      var inputElement = document.querySelector("#mat-input-0");
 
-      // try to send keyboard event to trigger the re-enable of the disabled button
-      // thanks chatgpt!
-      var event = new Event('input', { bubbles: true });
-      event.simulated = true;
-      var tracker = inputElement._valueTracker;
-      if (tracker) {
-        tracker.setValue("${sanitizedInput}");
-      }
-      inputElement.dispatchEvent(event);
-      inputElement.value = "${sanitizedInput}"
-      var btn = document.querySelector("button[aria-label*='Send message']");
-      btn.setAttribute("aria-disabled", "false"); // doesnt work alone
-      btn.click()`)
-      webviewOAI.executeJavaScript(`
-      var btn = document.querySelector("textarea[placeholder*='Send a message']+button");
-      btn.disabled = false;
-      btn.click()`)
-      webviewCLAUDE.executeJavaScript(`
-      var btn = document.querySelector('div.group.flex.p-3 button:has(svg)'); // YES we are using the has selector!!!!
-      btn.disabled = false;
-      btn.click()`)
-    })
+      webviewBARD.executeJavaScript(bard.getSubmitHandler(sanitizedInput));
+      webviewOAI.executeJavaScript(oai.getSubmitHandler(sanitizedInput));
+      webviewCLAUDE.executeJavaScript(claude.getSubmitHandler(sanitizedInput));
+    });
 
     // fix the styling of each chat
     webviewBARD.addEventListener('dom-ready', function () {
@@ -194,8 +184,8 @@
         .logo-gutter {
           display: none !important;
         }
-      `)
-    })
+      `);
+    });
     webviewOAI.addEventListener('dom-ready', function () {
 
       // hide message below text input, sidebar, suggestions on new chat
@@ -228,7 +218,7 @@
           display: none !important;
         }
 
-      `)
+      `);
 
       // const element = webviewOAI.executeJavaScript(`
       //  document.querySelector("[class*='shared__Wrapper']").innerHTML += "<h3>Start by asking anything.</h3>"
@@ -252,8 +242,8 @@
         .mx-4.md\:mx-12.mb-2.md\:mb-4.mt-2.w-auto {
           margin: 0 !important;
         }
-        `)
-      }, 1000)
+        `);
+      }, 1000);
 
       // const element = webviewOAI.executeJavaScript(`
       //  document.querySelector("[class*='shared__Wrapper']").innerHTML += "<h3>Start by asking anything.</h3>"
