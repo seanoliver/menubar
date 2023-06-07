@@ -39,9 +39,9 @@ class Bard {
       }`;
 	}
 
-  /** Adjustments to provider CSS on DOM ready */
-  getDomReadyCss() {
-    return `
+	/** Adjustments to provider CSS on DOM ready */
+	getDomReadyCss() {
+		return `
       .chat-history, .conversation-container, .input-area, .mdc-text-area {
         margin: 0 !important;
       }
@@ -71,7 +71,7 @@ class Bard {
         display: none !important;
       }
     `;
-  }
+	}
 }
 
 /**
@@ -103,9 +103,9 @@ class Oai {
       }`;
 	}
 
-  /** Adjustments to provider CSS on DOM ready */
-  getDomReadyCss() {
-    return `
+	/** Adjustments to provider CSS on DOM ready */
+	getDomReadyCss() {
+		return `
       .text-xs.text-center {
         opacity: 0;
         height: 0;
@@ -130,7 +130,7 @@ class Oai {
         display: none !important;
       }
     `;
-  }
+	}
 }
 
 /**
@@ -156,9 +156,9 @@ class Claude {
       }`;
 	}
 
-  /** Adjustments to provider CSS on DOM ready */
-  getDomReadyCss() {
-    return `
+	/** Adjustments to provider CSS on DOM ready */
+	getDomReadyCss() {
+		return `
       header, .container {
         background-color: white;
         filter: invert(100%) hue-rotate(180deg);
@@ -170,5 +170,5 @@ class Claude {
         margin: 0 !important;
       }
     `;
-  }
+	}
 }
