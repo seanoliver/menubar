@@ -172,3 +172,9 @@ class Claude {
     `;
 	}
 }
+
+module.exports = {
+  Bard,
+  Oai,
+  Claude
+};
