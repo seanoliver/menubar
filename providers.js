@@ -5,38 +5,50 @@ class Bard {
 	/** Gets prompt field input handler */
 	getInputHandler(sanitizedInput) {
 		return `
-      function() {
-        var inputElement = document.querySelector("#mat-input-0");
-        var event = new Event('input', { bubbles: true });
-        event.simulated = true;
-        var tracker = inputElement._valueTracker;
-        if (tracker) {
-          tracker.setValue("${sanitizedInput}");
-        }
-        setTimeout(function() {
-          inputElement.dispatchEvent(event);
-        }, 100);
-        inputElement.value = "${sanitizedInput}";
-      }`;
+      var inputElement = document.querySelector("#mat-input-0");
+
+      // try to send keyboard event to trigger the re-enable of the disabled button
+      // thanks chatgpt!
+      var event = new Event('input', { bubbles: true });
+      event.simulated = true;
+
+      var tracker = inputElement._valueTracker;
+
+      if (tracker) {
+        tracker.setValue("${sanitizedInput}");
+      }
+
+      // Dispatch the event after a short delay to fix the button state
+      setTimeout(function() {
+        inputElement.dispatchEvent(event);
+      }, 100);
+
+      inputElement.value = "${sanitizedInput}";
+    `;
 	}
 
 	/** Gets prompt form submit button handler */
 	getSubmitHandler(sanitizedInput) {
 		return `
-      function() {
-        var inputElement = document.querySelector("#mat-input-0");
-        var event = new Event('input', { bubbles: true });
-        event.simulated = true;
-        var tracker = inputElement._valueTracker;
-        if (tracker) {
-          tracker.setValue("${sanitizedInput}");
-        }
-        inputElement.dispatchEvent(event);
-        inputElement.value = "${sanitizedInput}";
-        var btn = document.querySelector("button[aria-label*='Send message']");
-        btn.setAttribute("aria-disabled", "false");
-        btn.click();
-      }`;
+      var inputElement = document.querySelector("#mat-input-0");
+
+      // try to send keyboard event to trigger the re-enable of the disabled button
+      // thanks chatgpt!
+      var event = new Event('input', { bubbles: true });
+      event.simulated = true;
+
+      var tracker = inputElement._valueTracker;
+      if (tracker) {
+        tracker.setValue("${sanitizedInput}");
+      }
+
+      inputElement.dispatchEvent(event);
+      inputElement.value = "${sanitizedInput}"
+
+      var btn = document.querySelector("button[aria-label*='Send message']");
+      btn.setAttribute("aria-disabled", "false"); // doesnt work alone
+      btn.click();
+    `;
 	}
 
 	/** Adjustments to provider CSS on DOM ready */
@@ -174,7 +186,7 @@ class Claude {
 }
 
 module.exports = {
-  Bard,
-  Oai,
-  Claude
+	Bard,
+	Oai,
+	Claude,
 };
