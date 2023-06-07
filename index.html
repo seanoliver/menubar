@@ -59,49 +59,6 @@
     });
 
     /**
-     * Service-specific handlers for connecting user input in superprompt to its
-     * respective webview.
-     */
-    function getBardHandler(sanitizedInput) {
-      return `
-        function() {
-          var inputElement = document.querySelector("#mat-input-0");
-          var event = new Event('input', { bubbles: true });
-          event.simulated = true;
-          var tracker = inputElement._valueTracker;
-          if (tracker) {
-            tracker.setValue("${sanitizedInput}");
-          }
-          setTimeout(function() {
-            inputElement.dispatchEvent(event);
-          }, 100);
-          inputElement.value = "${sanitizedInput}";
-        }`;
-    }
-
-    function getOaiHandler(sanitizedInput) {
-      return `
-        function() {
-          function simulateUserInput(element, text) {
-            const inputEvent = new Event('input', { bubbles: true });
-            element.focus();
-            element.value = text;
-            element.dispatchEvent(inputEvent);
-          }
-          var inputElement = document.querySelector('textarea[placeholder*="Send a message"]');
-          simulateUserInput(inputElement, "${sanitizedInput}");
-        }`;
-    }
-
-    function getClaudeHandler(sanitizedInput) {
-      return `
-        function() {
-          var inputElement = document.querySelector('div.ProseMirror');
-          inputElement.textContent = "${sanitizedInput}";
-        }`;
-    }
-
-    /**
      * Simulates user input by executing a provider-specific
      * handler function for the given provider's webview context (DOM).
      */
