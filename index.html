@@ -87,6 +87,8 @@
       }
     });
 
+    const form = document.getElementById('form');
+
     /** Submit superprompt on Cmd/Ctrl+Enter */
     promptEl.addEventListener("keydown", function (event) {
       const isCmdOrCtrl = event.metaKey || event.ctrlKey;
@@ -95,8 +97,6 @@
         form.dispatchEvent(new Event("submit"));
       }
     });
-
-    const form = document.getElementById('form');
 
     /** Submit superprompt to each provider's webview */
     form.addEventListener('submit', function (event) {
