@@ -50,39 +50,77 @@
         }
       }
     });
-    promptEl.addEventListener('input', function (event) {
-      // get prompt from input
-      const sanitizedInput = promptEl.value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
-      webviewBARD.executeJavaScript(`
-      var inputElement = document.querySelector("#mat-input-0");
 
-      // try to send keyboard event to trigger the re-enable of the disabled button
-      // thanks chatgpt!
-      var event = new Event('input', { bubbles: true });
-      event.simulated = true;
-      var tracker = inputElement._valueTracker;
-      if (tracker) {
-        tracker.setValue("${sanitizedInput}");
+    /**
+     * Service-specific handlers for connecting user input in superprompt to its
+     * respective webview.
+     */
+    function getBardHandler(sanitizedInput) {
+      return `
+        function() {
+          var inputElement = document.querySelector("#mat-input-0");
+          var event = new Event('input', { bubbles: true });
+          event.simulated = true;
+          var tracker = inputElement._valueTracker;
+          if (tracker) {
+            tracker.setValue("${sanitizedInput}");
+          }
+          setTimeout(function() {
+            inputElement.dispatchEvent(event);
+          }, 100);
+          inputElement.value = "${sanitizedInput}";
+        }`;
+    }
+
+    function getOaiHandler(sanitizedInput) {
+      return `
+        function() {
+          function simulateUserInput(element, text) {
+            const inputEvent = new Event('input', { bubbles: true });
+            element.focus();
+            element.value = text;
+            element.dispatchEvent(inputEvent);
+          }
+          var inputElement = document.querySelector('textarea[placeholder*="Send a message"]');
+          simulateUserInput(inputElement, "${sanitizedInput}");
+        }`;
+    }
+
+    function getClaudeHandler(sanitizedInput) {
+      return `
+        function() {
+          var inputElement = document.querySelector('div.ProseMirror');
+          inputElement.textContent = "${sanitizedInput}";
+        }`;
+    }
+
+    /**
+     * Simulates user input by executing a provider-specific
+     * handler function for the given provider's webview context (DOM).
+     */
+    function simulateUserInput(webview, handler) {
+      webview.executeJavaScript(`(${handler})();`);
+    }
+
+    /**
+     * Simulates user input by executing a function in each provider's webview
+     * context (DOM).
+     *
+     * Removes quotes and newlines from the input to avoid breaking the
+     * executeJavaScript call.
+     */
+    promptEl.addEventListener('input', function (event) {
+      const sanitizedInput = promptEl.value.replace(/"/g, '\\"').replace(/\n/g, '\\n');
+
+      try {
+        simulateUserInput(webviewBARD, getBardHandler(sanitizedInput));
+        simulateUserInput(webviewOAI, getOaiHandler(sanitizedInput));
+        simulateUserInput(webviewCLAUDE, getClaudeHandler(sanitizedInput));
+      } catch (err) {
+        console.error('Error simulating user input:', err);
       }
-      // Dispatch the event after a short delay to fix the button state
-      setTimeout(function() {
-        inputElement.dispatchEvent(event);
-      }, 100);
-      inputElement.value = "${sanitizedInput}"`)
-      webviewOAI.executeJavaScript(`
-      function simulateUserInput(element, text) {
-        const inputEvent = new Event('input', { bubbles: true });
-        element.focus();
-        element.value = text;
-        element.dispatchEvent(inputEvent);
-      }
-      var inputElement = document.querySelector('textarea[placeholder*="Send a message"]');
-      simulateUserInput(inputElement, "${sanitizedInput}");
-      `)
-      webviewCLAUDE.executeJavaScript(`
-      var inputElement = document.querySelector('div.ProseMirror')
-      inputElement.innerHTML = "${sanitizedInput}"`)
-    })
+    });
+
     promptEl.addEventListener("keydown", function (event) {
       const isCmdOrCtrl = event.metaKey || event.ctrlKey;
       if (isCmdOrCtrl && event.key === "Enter") {
@@ -167,7 +205,7 @@
           height: 0;
           margin-bottom: -10px;
         }
-        
+
         .sticky,
         .pointer-events-auto.flex.border-orange-500,
         [class*="shared__Capabilities"] {
